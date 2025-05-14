@@ -5,6 +5,7 @@ import UsernameScreen from "./UsernameScreen";
 import ModeSelection from "./ModeSelection";
 import GameScreen from "./GameScreen";
 import ResultsScreen from "./ResultsScreen";
+import ExitButton from "./ExitButton";
 
 const Game = () => {
   const { username, gameStarted, timeLeft, isGameActive } = useGameContext();
@@ -19,7 +20,12 @@ const Game = () => {
   }
   
   if (gameStarted && isGameActive) {
-    return <GameScreen />;
+    return (
+      <div className="relative">
+        <ExitButton />
+        <GameScreen />
+      </div>
+    );
   }
   
   return <ModeSelection />;

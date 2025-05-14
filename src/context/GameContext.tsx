@@ -2,11 +2,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type GameModes = "addition" | "subtraction" | "multiplication" | "division" | "integers" | "equations" | "pythagorean";
+type DifficultyLevels = "easy" | "medium" | "hard" | "very-hard";
 
 interface Player {
   username: string;
   score: number;
   mode: GameModes;
+  difficulty: DifficultyLevels;
   timestamp: number;
 }
 
@@ -18,6 +20,8 @@ interface GameContextType {
   endGame: () => void;
   gameMode: GameModes;
   setGameMode: (mode: GameModes) => void;
+  difficulty: DifficultyLevels;
+  setDifficulty: (level: DifficultyLevels) => void;
   timeLeft: number;
   score: number;
   incrementScore: () => void;
@@ -37,6 +41,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [username, setUsername] = useState<string>("");
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [gameMode, setGameMode] = useState<GameModes>("addition");
+  const [difficulty, setDifficulty] = useState<DifficultyLevels>("easy");
   const [timeLeft, setTimeLeft] = useState<number>(60);
   const [score, setScore] = useState<number>(0);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
@@ -93,6 +98,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // End game
   const endGame = () => {
     setIsGameActive(false);
+    setGameStarted(false); // This will return to mode selection
     addToLeaderboard();
   };
   
@@ -106,44 +112,62 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
   
-  // Generate question based on selected mode
+  // Get difficulty-based number ranges
+  const getDifficultyRange = () => {
+    switch (difficulty) {
+      case "easy":
+        return { min: 1, max: 10 };
+      case "medium":
+        return { min: 5, max: 25 };
+      case "hard":
+        return { min: 10, max: 50 };
+      case "very-hard":
+        return { min: 20, max: 100 };
+      default:
+        return { min: 1, max: 10 };
+    }
+  };
+  
+  // Generate question based on selected mode and difficulty
   const generateQuestion = () => {
     let question = "";
     let answer: string | number = "";
     
+    const range = getDifficultyRange();
+    
     switch (gameMode) {
       case "addition":
-        const num1 = getRandomInt(1, 100);
-        const num2 = getRandomInt(1, 100);
+        const num1 = getRandomInt(range.min, range.max);
+        const num2 = getRandomInt(range.min, range.max);
         question = `${num1} + ${num2} = ?`;
         answer = num1 + num2;
         break;
       
       case "subtraction":
-        const minuend = getRandomInt(10, 100);
-        const subtrahend = getRandomInt(1, minuend);
+        const minuend = getRandomInt(range.min, range.max);
+        const subtrahend = getRandomInt(range.min, minuend);
         question = `${minuend} - ${subtrahend} = ?`;
         answer = minuend - subtrahend;
         break;
       
       case "multiplication":
-        const factor1 = getRandomInt(2, 12);
-        const factor2 = getRandomInt(2, 12);
+        const factor1 = getRandomInt(range.min, Math.min(12, range.max));
+        const factor2 = getRandomInt(range.min, Math.min(12, range.max));
         question = `${factor1} × ${factor2} = ?`;
         answer = factor1 * factor2;
         break;
       
       case "division":
-        const divisor = getRandomInt(2, 12);
-        const quotient = getRandomInt(1, 10);
+        const divisor = getRandomInt(Math.max(2, range.min), Math.min(12, range.max));
+        const quotient = getRandomInt(range.min, Math.min(10, range.max));
         const dividend = divisor * quotient;
         question = `${dividend} ÷ ${divisor} = ?`;
         answer = quotient;
         break;
       
       case "integers":
-        const int1 = getRandomInt(-20, 20);
-        const int2 = getRandomInt(-20, 20);
+        const int1 = getRandomInt(-range.max, range.max);
+        const int2 = getRandomInt(-range.max, range.max);
         const ops = ["+", "-", "×"];
         const selectedOp = ops[getRandomInt(0, 2)];
         
@@ -159,8 +183,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         break;
       
       case "equations":
-        const x = getRandomInt(1, 10);
-        const eqB = getRandomInt(1, 20);
+        const x = getRandomInt(1, range.max / 2);
+        const eqB = getRandomInt(1, range.max);
         const eqC = x + eqB;
         
         question = `x + ${eqB} = ${eqC}, x = ?`;
@@ -176,10 +200,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           [7, 24, 25]
         ];
         
-        const triple = triples[getRandomInt(0, triples.length - 1)];
-        const a = triple[0];
-        const pyB = triple[1];
-        const pyC = triple[2];
+        // For harder difficulties, scale the triples
+        const scaleFactor = difficulty === "easy" ? 1 : 
+                           difficulty === "medium" ? 2 : 
+                           difficulty === "hard" ? 3 : 4;
+        
+        const baseTriple = triples[getRandomInt(0, triples.length - 1)];
+        const a = baseTriple[0] * scaleFactor;
+        const pyB = baseTriple[1] * scaleFactor;
+        const pyC = baseTriple[2] * scaleFactor;
         
         // Randomly decide which value to solve for
         const missing = getRandomInt(0, 2);
@@ -226,6 +255,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         username,
         score,
         mode: gameMode,
+        difficulty,
         timestamp: Date.now(),
       };
       
@@ -247,6 +277,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     endGame,
     gameMode,
     setGameMode,
+    difficulty,
+    setDifficulty,
     timeLeft,
     score,
     incrementScore,
