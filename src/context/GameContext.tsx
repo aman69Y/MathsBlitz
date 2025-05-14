@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type GameModes = "addition" | "subtraction" | "multiplication" | "division" | "integers" | "equations" | "pythagorean";
@@ -32,6 +31,7 @@ interface GameContextType {
   leaderboard: Player[];
   addToLeaderboard: () => void;
   isGameActive: boolean;
+  resetLeaderboard: () => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -63,10 +63,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Save leaderboard to localStorage
   useEffect(() => {
-    if (leaderboard.length > 0) {
-      localStorage.setItem("mathGameLeaderboard", JSON.stringify(leaderboard));
-    }
+    localStorage.setItem("mathGameLeaderboard", JSON.stringify(leaderboard));
   }, [leaderboard]);
+  
+  // Reset leaderboard
+  const resetLeaderboard = () => {
+    setLeaderboard([]);
+    localStorage.removeItem("mathGameLeaderboard");
+  };
   
   // Timer countdown
   useEffect(() => {
@@ -288,7 +292,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAnswer,
     leaderboard,
     addToLeaderboard,
-    isGameActive
+    isGameActive,
+    resetLeaderboard
   };
   
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

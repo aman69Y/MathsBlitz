@@ -2,9 +2,17 @@
 import React from "react";
 import { useGameContext } from "../context/GameContext";
 import { Button } from "./ui/button";
+import { toast } from "sonner";
 
 const ResultsScreen = () => {
-  const { score, setGameMode, startGame, gameMode, username } = useGameContext();
+  const { score, setGameMode, gameMode, username, resetLeaderboard } = useGameContext();
+  
+  const handleResetLeaderboard = () => {
+    resetLeaderboard();
+    toast("Leaderboard has been reset successfully", {
+      description: "All previous scores have been cleared",
+    });
+  };
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -28,7 +36,7 @@ const ResultsScreen = () => {
             Try Again
           </Button>
           <Button 
-            onClick={() => startGame()}
+            onClick={() => setGameMode("addition")}
             className="bg-monkeyDark border border-monkeyYellow text-monkeyYellow hover:bg-monkeyGray flex-1"
           >
             Change Mode
@@ -37,7 +45,16 @@ const ResultsScreen = () => {
       </div>
       
       <div className="w-full max-w-2xl">
-        <h2 className="text-2xl font-bold mb-4 text-center">Leaderboard</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-center">Leaderboard</h2>
+          <Button 
+            onClick={handleResetLeaderboard}
+            variant="destructive"
+            className="text-sm"
+          >
+            Reset Leaderboard
+          </Button>
+        </div>
         <LeaderboardTable />
       </div>
     </div>
@@ -57,7 +74,7 @@ const LeaderboardTable = () => {
   
   return (
     <div className="overflow-x-auto">
-      <table className="leaderboard-table">
+      <table className="leaderboard-table w-full">
         <thead>
           <tr>
             <th>Rank</th>
