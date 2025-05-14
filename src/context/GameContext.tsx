@@ -160,10 +160,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       case "equations":
         const x = getRandomInt(1, 10);
-        const b = getRandomInt(1, 20);
-        const c = x + b;
+        const eqB = getRandomInt(1, 20);
+        const eqC = x + eqB;
         
-        question = `x + ${b} = ${c}, x = ?`;
+        question = `x + ${eqB} = ${eqC}, x = ?`;
         answer = x;
         break;
       
@@ -178,21 +178,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const triple = triples[getRandomInt(0, triples.length - 1)];
         const a = triple[0];
-        const b = triple[1];
-        const c = triple[2];
+        const pyB = triple[1];
+        const pyC = triple[2];
         
         // Randomly decide which value to solve for
         const missing = getRandomInt(0, 2);
         
         if (missing === 0) {
-          question = `In a right triangle, if b = ${b} and c = ${c}, find a.`;
+          question = `In a right triangle, if b = ${pyB} and c = ${pyC}, find a.`;
           answer = a;
         } else if (missing === 1) {
-          question = `In a right triangle, if a = ${a} and c = ${c}, find b.`;
-          answer = b;
+          question = `In a right triangle, if a = ${a} and c = ${pyC}, find b.`;
+          answer = pyB;
         } else {
-          question = `In a right triangle, if a = ${a} and b = ${b}, find c.`;
-          answer = c;
+          question = `In a right triangle, if a = ${a} and b = ${pyB}, find c.`;
+          answer = pyC;
         }
         break;
     }
